@@ -80,6 +80,7 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--redirect')
     parser.add_argument('-o', '--output')
     parser.add_argument('--nproc', type=int, default=cpu_count() - 1)
+    parser.add_argument('--disable-tqdm', action='store_true')
     
     args = parser.parse_args()
     
@@ -90,6 +91,6 @@ if __name__ == "__main__":
     
     with Pool(processes=args.nproc) as pool:
         with gzip.open(args.input, 'rt', encoding='utf-8') as inf, gzip.open(args.output, 'wt', encoding='utf-8') as outf:
-            for page in tqdm(pool.imap_unordered(worker, zip(inf, it.repeat(title2target)))):
+            for page in tqdm(pool.imap_unordered(worker, zip(inf, it.repeat(title2target))), disable=args.disable_tqdm):
                 json.dump(page, outf)
                 outf.write('\n')

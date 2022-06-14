@@ -52,6 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output')
     parser.add_argument('-L', '--limit', type=int, help='Number of pages to process')
     parser.add_argument('--nproc', type=int, default=cpu_count() - 1)
+    parser.add_argument('--disable-tqdm', action='store_true')
 
     args = parser.parse_args()
     
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     
     with gzip.open(args.output, 'wt', encoding='utf-8') as outf:
         with Pool(processes=args.nproc) as pool:
-            for obj in tqdm(it.islice(pool.imap_unordered(worker, pages_iterator), args.limit)):
+            for obj in tqdm(it.islice(pool.imap_unordered(worker, pages_iterator), args.limit), disable=args.disable_tqdm):
                 # wikidata_id = None
                 # wikipedia_url = None
                 # if 'main_entity' in page:

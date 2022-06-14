@@ -16,6 +16,7 @@ if __name__ == '__main__':
     parser.add_argument('--output-all-redirect')
     parser.add_argument('--input-props')
     parser.add_argument('--output-props')
+    parser.add_argument('--disable-tqdm', action='store_true')
 
     args = parser.parse_args()
 
@@ -31,7 +32,7 @@ if __name__ == '__main__':
         cols = {'page_id': [], 'wikidata_id': []}
         with gzip.open(props_path, 'rt', encoding='cp850') as f:
             
-            for line in tqdm(f):
+            for line in tqdm(f, disable=args.disable_tqdm):
                 if not line.startswith(header):
                     continue
                     
@@ -58,7 +59,7 @@ if __name__ == '__main__':
             header = 'INSERT INTO `page` VALUES ('
             cols = {'page_id': [], 'page_title': [], 'is_redirect': []}
             
-            for line in tqdm(f):
+            for line in tqdm(f, disable=args.disable_tqdm):
                 if not line.startswith(header):
                     continue
                     
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         with gzip.open(redirect_path, 'rt', encoding='utf-8') as f:
             header = 'INSERT INTO `redirect` VALUES ('
             cols = {'source': [], 'target': []}
-            for line in tqdm(f):
+            for line in tqdm(f, disable=args.disable_tqdm):
                 if not line.startswith(header):
                     continue
                     
@@ -118,7 +119,7 @@ if __name__ == '__main__':
         'source': [],
         'target': []
     }
-    for title, is_redirect in tqdm(zip(df_pages['page_title'], df_pages['is_redirect']), total=len(df_pages)):
+    for title, is_redirect in tqdm(zip(df_pages['page_title'], df_pages['is_redirect']), total=len(df_pages), disable=args.disable_tqdm):
         target = find_last_target(title, src2target) if is_redirect else title   
         all_redirect_cols['source'].append(title)
         all_redirect_cols['target'].append(target)

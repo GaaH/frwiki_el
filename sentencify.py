@@ -42,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--entities-output')
     parser.add_argument('-l', '--lang', default='fr')
     parser.add_argument('--nproc', type=int, default=cpu_count() - 1)
+    parser.add_argument('--disable-tqdm', action='store_true')
     
     args = parser.parse_args()
     
@@ -52,7 +53,7 @@ if __name__ == "__main__":
     splitter = SentenceSplitter(language='fr')
     with gzip.open(args.input, 'rt', encoding='utf-8') as inf, gzip.open(args.output, 'wt', encoding='utf-8') as outf, gzip.open(args.entities_output, 'wt', encoding='utf-8') as ent_outf:
         with Pool(processes=args.nproc) as pool:
-            for ret in tqdm(pool.imap_unordered(worker, zip(inf, it.repeat(args.lang)))):
+            for ret in tqdm(pool.imap_unordered(worker, zip(inf, it.repeat(args.lang))), disable=args.disable_tqdm):
                 if ret is not None:
                     entity, page, sentences = ret
                     json.dump(entity, ent_outf)

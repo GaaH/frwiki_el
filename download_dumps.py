@@ -2,13 +2,13 @@ import requests
 from pathlib import Path
 from tqdm import tqdm
 
-def download_file(url, outpath):
+def download_file(url, outpath, disable_tqdm=False):
     outpath = Path(outpath)
     # Streaming, so we can iterate over the response.
     response = requests.get(url, stream=True)
     total_size_in_bytes = int(response.headers.get('content-length', 0))
     block_size = 8192
-    progress_bar = tqdm(desc=outpath.name, total=total_size_in_bytes, unit='iB', unit_scale=True)
+    progress_bar = tqdm(desc=outpath.name, total=total_size_in_bytes, unit='iB', unit_scale=True, disable=disable_tqdm)
     try:
         with open(outpath, 'wb') as file:
             for data in response.iter_content(block_size):
@@ -26,10 +26,10 @@ def download_file(url, outpath):
             outpath.unlink()
         raise e
             
-def download_file_if_not_exists(url, outpath):
+def download_file_if_not_exists(url, outpath, **kwargs):
     outpath = Path(outpath)
     if not outpath.is_file():
-        download_file(url, outpath)
+        download_file(url, outpath, **kwargs)
 
 
 if __name__ == '__main__':
@@ -41,6 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('--dl-html-dump', action='store_true', help='Also download the Wikimedia Enterprise dump file')
     parser.add_argument('--mirror', default='https://dumps.wikimedia.org/')
     parser.add_argument('--outdir', default='wikidumps')
+    parser.add_argument('--disable-tqdm', action='store_true')
     
     args = parser.parse_args()
     
@@ -66,6 +67,6 @@ if __name__ == '__main__':
     try:
         for filename, url in zip(filenames, urls):
             outpath = Path(outdir, filename)
-            download_file_if_not_exists(url, outpath)
+            download_file_if_not_exists(url, outpath, disable_tqdm=args.disable_tqdm)
     except KeyboardInterrupt:
         pass
